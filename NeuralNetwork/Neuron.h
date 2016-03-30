@@ -1,29 +1,9 @@
-/*
- * Neuron.h
- *
- *  Created on: 23 mar 2016
- *      Author: Bartosz Miera
- */
+#pragma once
 
-#ifndef NEURON_H_
-#define NEURON_H_
-
-#include "Node.h"
-
-/**
- * @brief
- *
- */
-class Neuron: public Node<Neuron> {
+class Neuron
+{
 public:
-	double getOutput() const;
-	void invalidateOutput();
-
-private:
-	mutable double m_outputValue;
-	mutable bool m_valid;
-
-	void countOutput() const;
+    virtual double getOutput() const = 0;
+    virtual void invalidateOutput() = 0;
+    virtual ~Neuron(){}
 };
-
-#endif /* NEURON_H_ */

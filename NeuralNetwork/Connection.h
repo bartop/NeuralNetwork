@@ -5,9 +5,7 @@
  *      Author: Bartosz Miera
  */
 
-#ifndef CONNECTION_H_
-#define CONNECTION_H_
-
+#pragma once
 
 /**
  * @brief
@@ -43,5 +41,3 @@ private:
 	const U *m_output;
 	double m_weight;
 };
-
-#endif /* CONNECTION_H_ */
