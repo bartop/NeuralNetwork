@@ -20,6 +20,10 @@ public:
         return connection;
     }
 
+    Connection<Base> *createConnectionFrom(InputNode<Base> &source){
+        return createConnectionFrom(&source);
+    }
+
     void addInputConnection(Connection<Base> *connection){
         m_inputs.push_back(connection);
     }

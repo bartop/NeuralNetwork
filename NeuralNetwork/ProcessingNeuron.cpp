@@ -15,11 +15,28 @@ void ProcessingNeuron::countOutput() const{
 		m_outputValue +=
 				i->getInput()->getOutput() *
 				i->getWeight();
-	}
+    }
 }
 
+void ProcessingNeuron::applyActivationFunction() const
+{
+    m_outputValue = m_activationFunction(m_outputValue);
+}
+
+ProcessingNeuron::ProcessingNeuron(const ActivationFunction &activationFunction) :
+    m_activationFunction(activationFunction)
+{
+
+}
+
+
 double ProcessingNeuron::getOutput() const {
-	if(!m_valid) countOutput();
+    if(!m_valid)
+    {
+        countOutput();
+        applyActivationFunction();
+    }
+
 	return m_outputValue;
 }
 

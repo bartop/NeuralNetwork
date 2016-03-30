@@ -20,6 +20,10 @@ public:
         return connection;
     }
 
+    Connection<Base> *createConnectionTo(OutputNode<Base> &destination){
+        return createConnectionTo(&destination);
+    }
+
     void addOutputConnection(Connection<Base> *connection){
         m_outputs.push_back(connection);
     }
