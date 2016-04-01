@@ -26,7 +26,8 @@ void ProcessingNeuron::applyActivationFunction() const
 ProcessingNeuron::ProcessingNeuron(const ActivationFunction &activationFunction) :
     m_activationFunction(activationFunction)
 {
-
+	m_valid = false;
+	m_outputValue = 0;
 }
 
 
