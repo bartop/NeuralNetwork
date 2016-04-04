@@ -10,8 +10,6 @@ void InputNeuron::setValue(double value)
     m_value = value;
 }
 
-
-
 double InputNeuron::getOutput() const
 {
     return m_value;

@@ -9,10 +9,9 @@
 #include "Connection.h"
 
 void ProcessingNeuron::countOutput() const{
-	m_valid = true;
-	m_outputValue = 0;
+    m_count = 0;
 	for(auto i : getInputs()){
-		m_outputValue +=
+        m_count +=
 				i->getInput()->getOutput() *
 				i->getWeight();
     }
@@ -20,7 +19,25 @@ void ProcessingNeuron::countOutput() const{
 
 void ProcessingNeuron::applyActivationFunction() const
 {
-    m_outputValue = m_activationFunction(m_outputValue);
+    m_outputValue = m_activationFunction(m_count);
+}
+
+void ProcessingNeuron::calculateDelta()
+{
+    double sum = 0;
+    
+    for (auto &con : getOutputs())
+    {
+        sum += con->getOutput()->getDelta() * con->getWeight();
+    }
+    
+    m_delta = m_activationFunction.derivative(m_count) * sum;
+}
+
+void ProcessingNeuron::calculateDelta(double expected)
+{
+    m_delta = m_activationFunction.derivative(m_count) * (getOutput() - expected);
+
 }
 
 ProcessingNeuron::ProcessingNeuron(const ActivationFunction &activationFunction) :
@@ -35,11 +52,51 @@ double ProcessingNeuron::getOutput() const {
     {
         countOutput();
         applyActivationFunction();
+
+        m_valid = true;
     }
 
 	return m_outputValue;
 }
 
 void ProcessingNeuron::invalidateOutput() {
-	m_valid = false;
+    m_valid = false;
+
+    for (auto &con: getInputs())
+    {
+        con->getInput()->invalidateOutput();
+    }
+}
+
+Eigen::VectorXd ProcessingNeuron::getInputWeights() const
+{
+    auto inputs = getInputs();
+    Eigen::VectorXd inputWeights(inputs.size());
+    for (unsigned i = 0; i < inputs.size(); ++i)
+    {
+        inputWeights(i) = inputs[i]->getWeight();
+    }
+
+    return inputWeights;
+}
+
+void ProcessingNeuron::setInputWeights(const Eigen::VectorXd &inputWeights)
+{
+    for (unsigned i = 0; i < getInputs().size(); ++i)
+    {
+        getInputs()[i]->setWeight(inputWeights(i));
+    }
+}
+
+double ProcessingNeuron::getDelta() const
+{
+    return m_delta;
+}
+
+void ProcessingNeuron::updateWeights(double rate)
+{
+    for (auto &con : getInputs())
+    {
+        con->setWeight(con->getWeight() - rate * m_delta * con->getInput()->getOutput());
+    }
 }

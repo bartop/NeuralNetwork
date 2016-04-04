@@ -2,7 +2,9 @@
 #include "InputNode.h"
 #include "Neuron.h"
 
-class InputNeuron : public InputNode<Neuron>
+class ProcessingNeuron;
+
+class InputNeuron : public InputNode<Neuron, ProcessingNeuron>
 {
 public:
     InputNeuron(double value = 0);

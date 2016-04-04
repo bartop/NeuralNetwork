@@ -2,36 +2,49 @@
 
 #include <vector>
 #include "Connection.h"
-
-template<typename Derived>
-class OutputNode;
+#include "dummy.h"
 
 /**
  * @brief
  *
  */
-template<typename Base>
-class InputNode : public virtual Base {
+
+template<typename U, typename T, typename Base>
+class InputNodeBase : public Base{
 public:
-    Connection<Base> *createConnectionTo(OutputNode<Base> *destination){
-        auto connection = new Connection<Base>(this, destination, 0);
+    template <typename O>
+    Connection<U, T> *createConnectionTo(O *destination){
+        auto connection = new Connection<U, T>(this, destination, 0);
         m_outputs.push_back(connection);
         destination->addInputConnection(connection);
         return connection;
     }
 
-    Connection<Base> *createConnectionTo(OutputNode<Base> &destination){
+    template <typename O>
+    Connection<U, T> *createConnectionTo(O &destination){
         return createConnectionTo(&destination);
     }
 
-    void addOutputConnection(Connection<Base> *connection){
+    void addOutputConnection(Connection<U, T> *connection){
         m_outputs.push_back(connection);
     }
 
-    const std::vector<Connection<Base> *> &getOutputs() const{ return m_outputs; }
+    const std::vector<Connection<U, T> *> &getOutputs() const{ return m_outputs; }
 
 private:
-    std::vector<Connection<Base> *> m_outputs;
+    std::vector<Connection<U, T> *> m_outputs;
+
+};
+
+template<typename Base, typename T = Base, bool inherit = true>
+class InputNode : public InputNodeBase<Base, T, Base>{
+
+
+};
+
+template<typename Base, typename T>
+class InputNode<Base, T, false> : public InputNodeBase<Base, T, __Dummy>
+{
 
 };
 

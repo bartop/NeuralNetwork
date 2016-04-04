@@ -14,8 +14,8 @@
  * @brief
  *
  */
-template<typename Base>
-class Node : public InputNode<Base>, public OutputNode<Base>
+template<typename Base, typename T = Base>
+class Node : public InputNode<Base, T, false>, public OutputNode<Base, T>
 {
 
 };

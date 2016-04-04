@@ -28,16 +28,16 @@ public:
 		return m_weight;
 	}
 
-	const T *getInput() const{
+    T *getInput() const{
 		return m_input;
 	}
 
-	const U *getOutput() const{
+    U *getOutput() const{
 		return m_output;
 	}
 
 private:
-	const T *m_input;
-	const U *m_output;
+    T *m_input;
+    U *m_output;
 	double m_weight;
 };

@@ -1,35 +1,48 @@
 #pragma once
 
 #include <vector>
-#include "Connection.h"
+#include "dummy.h"
 
-template<typename T>
-class InputNode;
 
 /**
  * @brief
  *
  */
-template<typename Base>
-class OutputNode : public virtual Base {
+template<typename U, typename T, typename Base>
+class OutputNodeBase : public Base {
 public:
-    Connection<Base> *createConnectionFrom(InputNode<Base> *source){
-        auto connection = new Connection<Base>(source, this, 0);
+    template <typename I>
+    Connection<U, T> *createConnectionFrom(I *source){
+        auto connection = new Connection<U, T>(source, this, 0);
         m_inputs.push_back(connection);
         source->addOutputConnection(connection);
         return connection;
     }
 
-    Connection<Base> *createConnectionFrom(InputNode<Base> &source){
+    template <typename I>
+    Connection<U, T> *createConnectionFrom(I &source){
         return createConnectionFrom(&source);
     }
 
-    void addInputConnection(Connection<Base> *connection){
+    void addInputConnection(Connection<U, T> *connection){
         m_inputs.push_back(connection);
     }
 
-    const std::vector<Connection<Base> *> &getInputs() const { return m_inputs; }
+    const std::vector<Connection<U, T> *> &getInputs() const { return m_inputs; }
 
 private:
-    std::vector<Connection<Base> *> m_inputs;
+    std::vector<Connection<U, T> *> m_inputs;
+};
+
+
+template<typename T, typename Base, bool inherit = true>
+class OutputNode : public OutputNodeBase<T, Base, Base>{
+
+
+};
+
+template<typename T, typename Base>
+class OutputNode<T, Base, false> : public OutputNodeBase<T, Base, __Dummy>
+{
+
 };

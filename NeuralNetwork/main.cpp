@@ -2,17 +2,47 @@
 
 #include "catch.hpp"
 
-#include "ProcessingNeuron.h"
+#include "SigmoidNeuron.h"
 #include "Connection.h"
 #include "InputNeuron.h"
 #include "ActivationFunctions.h"
 
+
+#include <cstdlib>
+
+
+TEST_CASE("creation and deletion")
+{
+    SECTION( "InputNeuron creation and deletion")
+    {
+        InputNeuron *neuron = new InputNeuron();
+        delete neuron;
+    }
+
+    SECTION( "SigmodNeuron creation and deletion")
+    {
+        SigmoidNeuron *neuron = new SigmoidNeuron();
+        delete neuron;
+    }
+
+    SECTION("Connection creation and deletion")
+    {
+        SigmoidNeuron sigmoid;
+        InputNeuron input;
+
+        Connection<Neuron, ProcessingNeuron> *con =
+                new Connection<Neuron, ProcessingNeuron>(&input, &sigmoid, 0);
+        delete con;
+
+    }
+}
+
 TEST_CASE("basic Neuron operation")
 {
     //Set up...
-    ProcessingNeuron neuron(ActivationFunctions::linear);
+    SigmoidNeuron neuron;
     InputNeuron input;
-    Connection<Neuron> *con;
+    Connection<Neuron, ProcessingNeuron> *con;
 
     SECTION( "connection to" ) {
         con = input.createConnectionTo(&neuron);
@@ -35,27 +65,30 @@ TEST_CASE("basic Neuron operation")
         con = input.createConnectionTo(&neuron);
         con->setWeight(1.0);
 
-        input.setValue(3.1415);
-        REQUIRE(neuron.getOutput() == input.getOutput());
+        neuron.invalidateOutput();
+        input.setValue(1.0);
+        CHECK(neuron.getOutput() == ActivationFunctions::sigmoid(input.getOutput()));
 
         con->setWeight(0.0);
         neuron.invalidateOutput();
-        REQUIRE(neuron.getOutput() == 0);
+        CHECK(neuron.getOutput() == ActivationFunctions::sigmoid(0));
     }
 
     //Tear down..
+    con->getWeight();
     delete con;
 }
 
 TEST_CASE("Simple fixed, raw net")
 {
-    ProcessingNeuron neuron(ActivationFunctions::step);
+    SigmoidNeuron neuron;
     InputNeuron input[2];
     InputNeuron bias(1.0);
 
-    Connection<Neuron> *con[3] = {neuron.createConnectionFrom(bias),
+    Connection<Neuron, ProcessingNeuron> *con[3] = {neuron.createConnectionFrom(bias),
                                   neuron.createConnectionFrom(input[0]),
                                   neuron.createConnectionFrom(input[1])};
+
 
     SECTION( "NAND Gate" )
     {
@@ -70,7 +103,41 @@ TEST_CASE("Simple fixed, raw net")
 
             neuron.invalidateOutput();
             INFO ("For inputs: " << input[0].getOutput() << ", " << input[1].getOutput());
-            CHECK (neuron.getOutput() == ((~((i/2)&(i%2)))&1));
+            CHECK (std::roundf(neuron.getOutput()) == ((~((i/2)&(i%2)))&1));
+        }
+    }
+
+    SECTION( "learning AND gate")
+    {
+        con[0]->setWeight(0.5);
+        con[1]->setWeight(0.5);
+        con[2]->setWeight(0.5);
+        for (unsigned i = 0; i < 3200000; ++i)
+        {
+            double expected = (((i/2)%2)&(i%2))&1;
+            input[0].setValue(i%2);
+            input[1].setValue((i/2)%2);
+
+            neuron.invalidateOutput();
+            neuron.getOutput();
+
+            neuron.calculateDelta(expected);
+            neuron.updateWeights(0.5);
+
+            //INFO ("For inputs: " << input[0].getOutput() << ", " << input[1].getOutput());
+            //CHECK (neuron.getOutput() == ((~((i/2)&(i%2)))&1));
+        }
+
+        for (unsigned i = 0; i < 4; ++i)
+        {
+            double expected = ((i/2)&(i%2))&1;
+            input[0].setValue(i%2);
+            input[1].setValue(i/2);
+
+            neuron.invalidateOutput();
+
+            INFO ("For inputs: " << input[0].getOutput() << ", " << input[1].getOutput());
+            CHECK (neuron.getOutput() == Approx(expected).epsilon(0.01));
         }
     }
 
@@ -78,5 +145,76 @@ TEST_CASE("Simple fixed, raw net")
     for (auto &c : con)
         delete c;
 }
+
+
+TEST_CASE("Complex fixed, raw net")
+{
+    SigmoidNeuron output;
+    SigmoidNeuron neuron[2];
+    InputNeuron input[2];
+    InputNeuron bias(1.0);
+
+    Connection<Neuron, ProcessingNeuron> *con[] = {
+                                 output.createConnectionFrom(bias),
+                                 output.createConnectionFrom(neuron[0]),
+                                 output.createConnectionFrom(neuron[1]),
+
+                                 neuron[0].createConnectionFrom(bias),
+                                 neuron[0].createConnectionFrom(input[0]),
+                                 neuron[0].createConnectionFrom(input[1]),
+
+                                 neuron[1].createConnectionFrom(bias),
+                                 neuron[1].createConnectionFrom(input[0]),
+                                 neuron[1].createConnectionFrom(input[1]),};
+
+    SECTION( "learning XOR gate")
+    {
+        for (auto &c : con)
+        {
+           c->setWeight((rand()%100)*2/100.0 - 1.0);
+        }
+
+        for (unsigned i = 0; i < 3200000; ++i)
+        {
+            int k = i%4;
+            double expected = ((k/2)^(k%2))&1;
+            input[0].setValue(k%2);
+            input[1].setValue(k/2);
+
+            output.invalidateOutput();
+            neuron[0].invalidateOutput();
+            neuron[1].invalidateOutput();
+            output.getOutput();
+
+            output.calculateDelta(expected);
+            neuron[0].calculateDelta();
+            neuron[1].calculateDelta();
+
+            neuron[0].updateWeights(0.1);
+            neuron[1].updateWeights(0.1);
+            output.updateWeights(0.1);
+
+        }
+
+        for (unsigned i = 0; i < 4; ++i)
+        {
+            double expected = ((i/2)^(i%2))&1;
+            input[0].setValue(i%2);
+            input[1].setValue(i/2);
+
+            output.invalidateOutput();
+            neuron[0].invalidateOutput();
+            neuron[1].invalidateOutput();
+
+            INFO ("For inputs: " << input[0].getOutput() << ", " << input[1].getOutput());
+            CHECK (output.getOutput() == Approx(expected).epsilon(0.01));
+        }
+    }
+
+
+    for (auto &c : con)
+        delete c;
+}
+
 
 

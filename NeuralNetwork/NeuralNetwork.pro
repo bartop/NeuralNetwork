@@ -5,9 +5,9 @@ CONFIG -= qt
 
 SOURCES += main.cpp \
     InputNeuron.cpp \
-    ProcessingNeuron.cpp \
     ActivationFunction.cpp \
-    ActivationFunctions.cpp
+    ActivationFunctions.cpp \
+    SigmoidNeuron.cpp
 
 include(deployment.pri)
 qtcAddDeployment()
@@ -22,5 +22,7 @@ HEADERS += \
     ProcessingNeuron.h \
     Neuron.h \
     ActivationFunction.h \
-    ActivationFunctions.h
+    ActivationFunctions.h \
+    SigmoidNeuron.h \
+    dummy.h
 
