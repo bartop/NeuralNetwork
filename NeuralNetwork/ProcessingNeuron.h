@@ -14,9 +14,11 @@
  * @brief
  *
  */
-class ProcessingNeuron: public virtual Neuron {
+class ProcessingNeuron: public Neuron {
 public:
     virtual double getDelta() const = 0;
     virtual void updateWeights(double rate) = 0;
+    virtual void calculateDelta() = 0;
+    virtual void calculateDelta(double expected) = 0;
     virtual ~ProcessingNeuron(){}
 };

@@ -15,7 +15,7 @@ double InputNeuron::getOutput() const
     return m_value;
 }
 
-void InputNeuron::invalidateOutput()
+void InputNeuron::calculateOutput()
 {
     //do nothing...
 }

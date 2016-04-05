@@ -11,7 +11,7 @@ public:
     void setValue(double value);
 
     double getOutput() const override;
-    void invalidateOutput() override;
+    void calculateOutput() override;
 
 private:
     double m_value;

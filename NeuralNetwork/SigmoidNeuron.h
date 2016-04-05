@@ -19,9 +19,9 @@
  */
 class SigmoidNeuron: public Node<Neuron, ProcessingNeuron> {
 public:
-    SigmoidNeuron();
+    SigmoidNeuron(double multiplier = 1.0);
     double getOutput() const override;
-    void invalidateOutput() override;
+    void calculateOutput() override;
 
     double getDelta() const override;
     void updateWeights(double rate) override;
@@ -29,15 +29,11 @@ public:
     void calculateDelta();
     void calculateDelta(double expected);
 
-
 private:
-    const ActivationFunction &m_activationFunction;
-
-    mutable double m_count;
+    double m_multiplier;
     double m_delta;
-    mutable double m_outputValue;
-    mutable bool m_valid;
+    double m_outputValue;
 
-    void countOutput() const;
-    void applyActivationFunction() const;
+    double activationFunction(double x) const;
+    double outputDerivative() const;
 };

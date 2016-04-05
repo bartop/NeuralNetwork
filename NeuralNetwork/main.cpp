@@ -65,12 +65,12 @@ TEST_CASE("basic Neuron operation")
         con = input.createConnectionTo(&neuron);
         con->setWeight(1.0);
 
-        neuron.invalidateOutput();
         input.setValue(1.0);
+        neuron.calculateOutput();
         CHECK(neuron.getOutput() == ActivationFunctions::sigmoid(input.getOutput()));
 
         con->setWeight(0.0);
-        neuron.invalidateOutput();
+        neuron.calculateOutput();
         CHECK(neuron.getOutput() == ActivationFunctions::sigmoid(0));
     }
 
@@ -81,7 +81,7 @@ TEST_CASE("basic Neuron operation")
 
 TEST_CASE("Simple fixed, raw net")
 {
-    SigmoidNeuron neuron;
+    SigmoidNeuron neuron(10.0);
     InputNeuron input[2];
     InputNeuron bias(1.0);
 
@@ -101,7 +101,7 @@ TEST_CASE("Simple fixed, raw net")
             input[0].setValue(i%2);
             input[1].setValue(i/2);
 
-            neuron.invalidateOutput();
+            neuron.calculateOutput();
             INFO ("For inputs: " << input[0].getOutput() << ", " << input[1].getOutput());
             CHECK (std::roundf(neuron.getOutput()) == ((~((i/2)&(i%2)))&1));
         }
@@ -112,20 +112,17 @@ TEST_CASE("Simple fixed, raw net")
         con[0]->setWeight(0.5);
         con[1]->setWeight(0.5);
         con[2]->setWeight(0.5);
-        for (unsigned i = 0; i < 3200000; ++i)
+        for (unsigned i = 0; i < 32000; ++i)
         {
             double expected = (((i/2)%2)&(i%2))&1;
             input[0].setValue(i%2);
             input[1].setValue((i/2)%2);
 
-            neuron.invalidateOutput();
+            neuron.calculateOutput();
             neuron.getOutput();
 
             neuron.calculateDelta(expected);
             neuron.updateWeights(0.5);
-
-            //INFO ("For inputs: " << input[0].getOutput() << ", " << input[1].getOutput());
-            //CHECK (neuron.getOutput() == ((~((i/2)&(i%2)))&1));
         }
 
         for (unsigned i = 0; i < 4; ++i)
@@ -134,7 +131,7 @@ TEST_CASE("Simple fixed, raw net")
             input[0].setValue(i%2);
             input[1].setValue(i/2);
 
-            neuron.invalidateOutput();
+            neuron.calculateOutput();
 
             INFO ("For inputs: " << input[0].getOutput() << ", " << input[1].getOutput());
             CHECK (neuron.getOutput() == Approx(expected).epsilon(0.01));
@@ -149,8 +146,8 @@ TEST_CASE("Simple fixed, raw net")
 
 TEST_CASE("Complex fixed, raw net")
 {
-    SigmoidNeuron output;
-    SigmoidNeuron neuron[2];
+    SigmoidNeuron output{10};
+    SigmoidNeuron neuron[2]{10, 10};
     InputNeuron input[2];
     InputNeuron bias(1.0);
 
@@ -171,7 +168,7 @@ TEST_CASE("Complex fixed, raw net")
     {
         for (auto &c : con)
         {
-           c->setWeight((rand()%100)*2/100.0 - 1.0);
+          // c->setWeight( (rand()%100)*2/100.0 - 1.0);
         }
 
         for (unsigned i = 0; i < 3200000; ++i)
@@ -181,18 +178,17 @@ TEST_CASE("Complex fixed, raw net")
             input[0].setValue(k%2);
             input[1].setValue(k/2);
 
-            output.invalidateOutput();
-            neuron[0].invalidateOutput();
-            neuron[1].invalidateOutput();
-            output.getOutput();
+            neuron[0].calculateOutput();
+            neuron[1].calculateOutput();
+            output.calculateOutput();
 
             output.calculateDelta(expected);
             neuron[0].calculateDelta();
             neuron[1].calculateDelta();
 
-            neuron[0].updateWeights(0.1);
-            neuron[1].updateWeights(0.1);
-            output.updateWeights(0.1);
+            neuron[0].updateWeights(0.5);
+            neuron[1].updateWeights(0.5);
+            output.updateWeights(0.5);
 
         }
 
@@ -202,9 +198,9 @@ TEST_CASE("Complex fixed, raw net")
             input[0].setValue(i%2);
             input[1].setValue(i/2);
 
-            output.invalidateOutput();
-            neuron[0].invalidateOutput();
-            neuron[1].invalidateOutput();
+            neuron[0].calculateOutput();
+            neuron[1].calculateOutput();
+            output.calculateOutput();
 
             INFO ("For inputs: " << input[0].getOutput() << ", " << input[1].getOutput());
             CHECK (output.getOutput() == Approx(expected).epsilon(0.01));
