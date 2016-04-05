@@ -7,20 +7,16 @@
 
 #include "SigmoidNeuron.h"
 #include "Connection.h"
-#include "ActivationFunctions.h"
+#include <cmath>
 
-void SigmoidNeuron::countOutput() const{
-    m_count = 0;
-    for(auto i : getInputs()){
-        m_count +=
-                i->getInput()->getOutput() *
-                i->getWeight();
-    }
+double SigmoidNeuron::activationFunction(double x) const
+{
+     return 1.0/(1.0 + std::exp(-x*m_multiplier));
 }
 
-void SigmoidNeuron::applyActivationFunction() const
+double SigmoidNeuron::outputDerivative() const
 {
-    m_outputValue = m_activationFunction(m_count);
+    return (getOutput())*(1.0 - getOutput());
 }
 
 void SigmoidNeuron::calculateDelta()
@@ -32,41 +28,35 @@ void SigmoidNeuron::calculateDelta()
         sum += con->getOutput()->getDelta() * con->getWeight();
     }
 
-    m_delta = m_activationFunction.derivative(m_count) * sum;
+    m_delta = outputDerivative() * sum;
 }
 
 void SigmoidNeuron::calculateDelta(double expected)
 {
-    m_delta = m_activationFunction.derivative(m_count) * (expected - getOutput());
+    m_delta = outputDerivative() * (expected - getOutput());
 
 }
 
-SigmoidNeuron::SigmoidNeuron() :
-    m_activationFunction(ActivationFunctions::sigmoid)
+SigmoidNeuron::SigmoidNeuron(double multiplier):m_multiplier(multiplier)
 {
 
 }
 
 
 double SigmoidNeuron::getOutput() const {
-    if(!m_valid)
-    {
-        countOutput();
-        applyActivationFunction();
-
-        m_valid = true;
-    }
-
     return m_outputValue;
 }
 
-void SigmoidNeuron::invalidateOutput() {
-    m_valid = false;
-
-    for (auto &con: getInputs())
-    {
-        con->getInput()->invalidateOutput();
+void SigmoidNeuron::calculateOutput() {
+    m_outputValue = 0;
+    for(auto i : getInputs()){
+        m_outputValue +=
+                i->getInput()->getOutput() *
+                i->getWeight();
     }
+
+    m_outputValue = activationFunction(m_outputValue);
+
 }
 
 
