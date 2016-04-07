@@ -7,10 +7,8 @@ SOURCES += main.cpp \
     InputNeuron.cpp \
     ActivationFunction.cpp \
     ActivationFunctions.cpp \
-    SigmoidNeuron.cpp
-
-include(deployment.pri)
-qtcAddDeployment()
+    SigmoidNeuron.cpp \
+    helper.cpp
 
 HEADERS += \
     catch.hpp \
@@ -24,5 +22,8 @@ HEADERS += \
     ActivationFunction.h \
     ActivationFunctions.h \
     SigmoidNeuron.h \
-    dummy.h
+    dummy.h \
+    neuralnetwork.h \
+    learningalgorithm.h \
+    helper.h
 

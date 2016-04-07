@@ -6,9 +6,47 @@
 #include "Connection.h"
 #include "InputNeuron.h"
 #include "ActivationFunctions.h"
-
+#include "neuralnetwork.h"
+#include "learningalgorithm.h"
+#include "helper.h"
 
 #include <cstdlib>
+
+TEST_CASE("Vector arithmetics")
+{
+    std::vector<double> first = {1, 2, 3, 4};
+    std::vector<double> second = {3, 6, 9, 12};
+    std::vector<double> three = {3, 3, 3, 3};
+
+    SECTION ("Sum")
+    {
+        CHECK(second == first + first + first);
+        first += first + first;
+        CHECK(second == first);
+    }
+
+    SECTION("Difference")
+    {
+        CHECK(second - first - first == first);
+        second -= first + first;
+        CHECK(second == first);
+    }
+
+    SECTION("Multiplication")
+    {
+        CHECK(second == first * three);
+        first *= three;
+        CHECK(second == first);
+    }
+
+    SECTION("Division")
+    {
+        CHECK(second/three == first);
+        second /= three;
+        CHECK(second == first);
+    }
+
+}
 
 
 TEST_CASE("creation and deletion")
@@ -168,7 +206,7 @@ TEST_CASE("Complex fixed, raw net")
     {
         for (auto &c : con)
         {
-          // c->setWeight( (rand()%100)*2/100.0 - 1.0);
+           c->setWeight( (rand()%100)*2/100.0 - 1.0);
         }
 
         for (unsigned i = 0; i < 3200000; ++i)
@@ -212,5 +250,74 @@ TEST_CASE("Complex fixed, raw net")
         delete c;
 }
 
+TEST_CASE("simple NeuralNetwork test")
+{
+    SECTION("NeuralNetwork output size")
+    {
+        NeuralNetwork<SigmoidNeuron, 2> neuralNetwork({2, 2, 3});
+        neuralNetwork.calculateOutput();
+        CHECK(3 == neuralNetwork.getOutput().size());
+    }
 
+
+    SECTION( "learning XOR gate")
+    {
+        NeuralNetwork<SigmoidNeuron, 2> neuralNetwork({2, 10, 1});
+
+        for (unsigned i = 0; i < 320000; ++i)
+        {
+            int k = i%4;
+            double expected = ((k/2)^(k%2))&1;
+
+            neuralNetwork.setInput({(double)(k/2),
+                                    (double)(k%2)});
+            neuralNetwork.calculateOutput();
+            neuralNetwork.backPropagate({expected});
+            neuralNetwork.updateWeights(0.2);
+
+        }
+
+        for (unsigned i = 0; i < 4; ++i)
+        {
+            double expected = ((i/2)^(i%2))&1;
+
+            neuralNetwork.setInput({(double)(i/2),
+                                    (double)(i%2)});
+
+            INFO ("For inputs: " << i/2 << ", " << i%2);
+            CHECK (neuralNetwork.getOutput().front() == Approx(expected).epsilon(0.01));
+        }
+    }
+}
+
+TEST_CASE("LearningAlgorithm test")
+{
+    SECTION("learning square root")
+    {
+        const unsigned sampleSize = 25;
+        const double stepSize = 1.0;
+
+        NeuralNetwork<SigmoidNeuron, 2> network({1, 100, 1});
+        LearningAlgorithm<SigmoidNeuron, 2> learningAlgorithm(network);
+
+        std::vector<std::vector<double>> inputs(sampleSize), outputs(sampleSize);
+
+        double val = 0;
+        for(unsigned i = 0; i < sampleSize; ++i, val += stepSize)
+        {
+            inputs[i].push_back(val);
+            outputs[i].push_back(std::sqrt(val)/5);
+        }
+
+        learningAlgorithm.learn(inputs, outputs, 0.1, 100000);
+
+        for (double input = 0.0; input < 10.0; input += 0.25)
+        {
+            network.setInput({input});
+            CHECK(network.getOutput().front()*5.0 == Approx(std::sqrt(input)).epsilon(0.1));
+        }
+
+
+    }
+}
 

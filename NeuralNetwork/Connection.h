@@ -14,7 +14,7 @@
 template<typename T, typename U = T>
 class Connection {
 public:
-	Connection(T *input, U *output, double weight){
+    Connection(T *input, U *output, double weight){
 		m_input = input;
 		m_output = output;
 		m_weight = weight;
@@ -28,13 +28,21 @@ public:
 		return m_weight;
 	}
 
-    T *getInput() const{
-		return m_input;
-	}
+    T *getInput(){
+        return m_input;
+    }
 
-    U *getOutput() const{
-		return m_output;
-	}
+    U *getOutput(){
+        return m_output;
+    }
+
+    const T *getInput() const{
+        return m_input;
+    }
+
+    const U *getOutput() const{
+        return m_output;
+    }
 
 private:
     T *m_input;

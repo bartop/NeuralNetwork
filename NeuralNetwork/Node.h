@@ -15,7 +15,7 @@
  *
  */
 template<typename Base, typename T = Base>
-class Node : public InputNode<Base, T, false>, public OutputNode<Base, T>
+class Node : public InputNodeBase<Base, T, OutputNode<Base, T>>
 {
 
 };
