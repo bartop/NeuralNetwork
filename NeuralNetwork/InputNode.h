@@ -9,8 +9,8 @@
  *
  */
 
-template<typename U, typename T, typename Base>
-class InputNodeBase : public Base{
+template<typename U, typename T, typename Base = U>
+class InputNode : public Base{
 public:
     template <typename O>
     Connection<U, T> *createConnectionTo(O *destination){
@@ -36,15 +36,18 @@ private:
 
 };
 
+/*
 template<typename Base, typename T = Base, bool inherit = true>
 class InputNode : public InputNodeBase<Base, T, Base>{
 
 
 };
 
+
 template<typename Base, typename T>
 class InputNode<Base, T, false> : public InputNodeBase<Base, T, __Dummy>
 {
 
 };
+*/
 

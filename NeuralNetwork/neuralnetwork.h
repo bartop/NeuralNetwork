@@ -5,6 +5,9 @@
 #include <random>
 #include <cmath>
 
+#include <initializer_list>
+
+
 #include "InputNeuron.h"
 
 template <class NeuronClass, unsigned PROCESSING_LAYERS_COUNT>
@@ -66,10 +69,33 @@ class NeuralNetwork
         }
     }
 
+    /*template <unsigned i = 0, typename... T>
+    void initialize(T first, T...args)
+    {
+        randomizeWeights(m_processingLayers);
+    }
+
+    template <unsigned i, typename T>
+    void initialize(T first)
+    {
+        static_assert( i != PROCESSING_LAYERS_COUNT - 1, "Wrong number of initializers");
+        m_processingLayers.resize(first);
+        randomizeWeights(m_processingLayers[i]);
+        connectLayers(m_processingLayers[i - 1], m_processingLayers[i]);
+    }
+
+    template <unsigned i, typename T>
+    void initialize<0, T>(T first)
+    {
+        randomizeWeights(m_processingLayers[i]);
+        connectLayers(m_inputLayer, m_processingLayers[i]);
+    }*/
+
 public:
-    NeuralNetwork(const std::array<unsigned, PROCESSING_LAYERS_COUNT + 1> &neuronsInLayers) :
+    NeuralNetwork(const std::initializer_list<unsigned> &neuronsInLayers) :
         m_biasNeuron(1.0)
     {
+        //static_assert(neuronsInLayers.size() == PROCESSING_LAYERS_COUNT + 1, "Wrong size!");
         auto it = neuronsInLayers.begin();
         m_inputLayer.resize(*it);
 

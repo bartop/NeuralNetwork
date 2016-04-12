@@ -7,8 +7,7 @@ SOURCES += main.cpp \
     InputNeuron.cpp \
     ActivationFunction.cpp \
     ActivationFunctions.cpp \
-    SigmoidNeuron.cpp \
-    helper.cpp
+    SigmoidNeuron.cpp
 
 HEADERS += \
     catch.hpp \
@@ -22,7 +21,6 @@ HEADERS += \
     ActivationFunction.h \
     ActivationFunctions.h \
     SigmoidNeuron.h \
-    dummy.h \
     neuralnetwork.h \
     learningalgorithm.h \
     helper.h

@@ -254,7 +254,7 @@ TEST_CASE("simple NeuralNetwork test")
 {
     SECTION("NeuralNetwork output size")
     {
-        NeuralNetwork<SigmoidNeuron, 2> neuralNetwork({2, 2, 3});
+        NeuralNetwork<SigmoidNeuron, 2> neuralNetwork({2, 1, 3});
         neuralNetwork.calculateOutput();
         CHECK(3 == neuralNetwork.getOutput().size());
     }

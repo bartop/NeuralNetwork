@@ -8,8 +8,8 @@
  * @brief
  *
  */
-template<typename U, typename T, typename Base>
-class OutputNodeBase : public Base {
+template<typename U, typename T, typename Base = T>
+class OutputNode : public Base {
 public:
     template <typename I>
     Connection<U, T> *createConnectionFrom(I *source){
@@ -34,7 +34,7 @@ private:
     std::vector<Connection<U, T> *> m_inputs;
 };
 
-
+/*
 template<typename T, typename Base, bool inherit = true>
 class OutputNode : public OutputNodeBase<T, Base, Base>{
 
@@ -45,4 +45,4 @@ template<typename T, typename Base>
 class OutputNode<T, Base, false> : public OutputNodeBase<T, Base, __Dummy>
 {
 
-};
+};*/
