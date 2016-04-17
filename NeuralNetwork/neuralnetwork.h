@@ -8,6 +8,7 @@
 #include <initializer_list>
 
 #include "InputNeuron.h"
+#include "helper.h"
 
 template <class NeuronClass, unsigned PROCESSING_LAYERS_COUNT>
 class NeuralNetwork : public NeuralNetworkI
@@ -17,7 +18,7 @@ class NeuralNetwork : public NeuralNetworkI
     std::array<std::vector<NeuronClass>, PROCESSING_LAYERS_COUNT> m_processingLayers;
     std::vector<InputNeuron> m_inputLayer;
     std::vector<std::unique_ptr<Connection<Neuron, ProcessingNeuron>>> m_connections;
-    std::vector<double> m_outputMultiplier;
+    std::vector<double> m_outputMultiplier, m_outputOffset;
 
     template <typename F>
     void foreachProcessingNeuron(F function)
@@ -114,6 +115,8 @@ public:
         }
 
         m_outputMultiplier.resize(m_processingLayers.back().size(), 1.0);
+        m_outputOffset.resize(m_processingLayers.back().size(), 0.0);
+
     }
 
     void calculateOutput() override
@@ -124,14 +127,14 @@ public:
     std::vector<double> getOutput() override
     {
         std::vector<double> output;
-        auto multiplier = m_outputMultiplier.begin();
         calculateOutput();
 
         for (const auto &neuron : m_processingLayers.back())
         {
-            output.push_back(neuron.getOutput() * (*multiplier));
-            ++multiplier;
+            output.push_back(neuron.getOutput());
         }
+
+        output = (output  * m_outputMultiplier) - m_outputOffset;
 
         return output;
     }
@@ -147,13 +150,12 @@ public:
 
     void backPropagate(const std::vector<double> &expectedOutput) override
     {
-        auto expected = expectedOutput.begin();
-        auto multiplier = m_outputMultiplier.begin();
+        std::vector<double> scaled = (expectedOutput + m_outputOffset) / m_outputMultiplier;
+        auto expected = scaled.begin();
         for (auto &neuron : m_processingLayers.back())
         {
-            neuron.calculateDelta((*expected) / (*multiplier));
+            neuron.calculateDelta(*expected);
             ++expected;
-            ++multiplier;
         }
 
         for (auto it = std::next(m_processingLayers.rbegin());
@@ -170,6 +172,11 @@ public:
     void setOutputMultiplier(const std::vector<double> &outputMultiplier) override
     {
         m_outputMultiplier = outputMultiplier;
+    }
+
+    void setOutputOffset(const std::vector<double> &offset)
+    {
+        m_outputOffset = offset;
     }
 
 

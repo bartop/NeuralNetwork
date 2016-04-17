@@ -7,7 +7,8 @@ SOURCES += main.cpp \
     InputNeuron.cpp \
     ActivationFunction.cpp \
     ActivationFunctions.cpp \
-    SigmoidNeuron.cpp
+    SigmoidNeuron.cpp \
+    weatherdatareader.cpp
 
 HEADERS += \
     catch.hpp \
@@ -24,5 +25,6 @@ HEADERS += \
     neuralnetwork.h \
     learningalgorithm.h \
     helper.h \
-    neuralnetworki.h
+    neuralnetworki.h \
+    weatherdatareader.h
 

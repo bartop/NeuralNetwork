@@ -9,6 +9,7 @@
 #include "neuralnetwork.h"
 #include "learningalgorithm.h"
 #include "helper.h"
+#include "weatherdatareader.h"
 
 #include <cstdlib>
 
@@ -318,7 +319,42 @@ TEST_CASE("LearningAlgorithm test")
             network.setInput({input});
             CHECK(network.getOutput().front() == Approx(std::sqrt(input)).epsilon(0.1));
         }
+    }
+}
 
+TEST_CASE("WeatherDataReader")
+{
+    WeatherDataReader reader("/home/rames/Projects/Qt/NeuralNetwork/NeuralNetwork/Data/1_avg.csv");
+
+    SECTION("Reading data")
+    {
+        auto output = reader.generateTrainingData(3, 1);
+        CHECK(output.first.size() == output.second.size());
+        CHECK(output.first.front().size() == 3*output.second.front().size());
+    }
+
+    SECTION("Learning weather prediction")
+    {
+        auto data = reader.generateTrainingData(3, 1);
+
+        NeuralNetwork<SigmoidNeuron, 2> network{data.first.front().size(), 1000, data.second.front().size()};
+        LearningAlgorithm learningAlgorithm(network);
+
+        network.setOutputMultiplier({100, 100, 360, 100, 100, 100, 100, 360, 100, 100, 100, 100, 360, 100, 100, 100, 100, 360, 100, 100, 100, 100, 360, 100, 100, 100, 100, 360, 100, 100});
+        network.setOutputOffset({0, 0, 0, 100, 0, 0, 0, 0, 100, 0, 0, 0, 0, 100, 0, 0, 0, 0, 100, 0, 0, 0, 0, 100, 0, 0, 0, 0, 100, 0});
+
+        learningAlgorithm.learn(data.first, data.second, 10);
+
+        network.setInput(data.first[100]);
+
+        auto networkOutput = network.getOutput();
+        auto it = networkOutput.begin();
+
+        for (auto val : data.second[100])
+        {
+            CHECK(*it == Approx(val).epsilon(0.1));
+            ++it;
+        }
 
     }
 }
