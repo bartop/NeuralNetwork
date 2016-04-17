@@ -298,7 +298,8 @@ TEST_CASE("LearningAlgorithm test")
         const double stepSize = 1.0;
 
         NeuralNetwork<SigmoidNeuron, 2> network({1, 100, 1});
-        LearningAlgorithm<SigmoidNeuron, 2> learningAlgorithm(network);
+        LearningAlgorithm learningAlgorithm(network);
+        network.setOutputMultiplier({5.0});
 
         std::vector<std::vector<double>> inputs(sampleSize), outputs(sampleSize);
 
@@ -306,15 +307,16 @@ TEST_CASE("LearningAlgorithm test")
         for(unsigned i = 0; i < sampleSize; ++i, val += stepSize)
         {
             inputs[i].push_back(val);
-            outputs[i].push_back(std::sqrt(val)/5);
+            outputs[i].push_back(std::sqrt(val));
         }
 
-        learningAlgorithm.learn(inputs, outputs, 0.1, 100000);
+        //learningAlgorithm.learn(inputs, outputs, 0.1, 100000);
+        learningAlgorithm.learnUntilError(inputs, outputs, 0.5, 0.02);
 
         for (double input = 0.0; input < 10.0; input += 0.25)
         {
             network.setInput({input});
-            CHECK(network.getOutput().front()*5.0 == Approx(std::sqrt(input)).epsilon(0.1));
+            CHECK(network.getOutput().front() == Approx(std::sqrt(input)).epsilon(0.1));
         }
 
 

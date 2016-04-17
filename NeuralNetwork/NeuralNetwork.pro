@@ -23,5 +23,6 @@ HEADERS += \
     SigmoidNeuron.h \
     neuralnetwork.h \
     learningalgorithm.h \
-    helper.h
+    helper.h \
+    neuralnetworki.h
 

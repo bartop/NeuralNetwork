@@ -16,7 +16,7 @@ double SigmoidNeuron::activationFunction(double x) const
 
 double SigmoidNeuron::outputDerivative() const
 {
-    return (getOutput())*(1.0 - getOutput());
+    return (getOutput())*(1.0 - getOutput())*m_multiplier;
 }
 
 void SigmoidNeuron::calculateDelta()

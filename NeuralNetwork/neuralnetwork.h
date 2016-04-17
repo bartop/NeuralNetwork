@@ -4,20 +4,20 @@
 #include <memory>
 #include <random>
 #include <cmath>
-
+#include <neuralnetworki.h>
 #include <initializer_list>
-
 
 #include "InputNeuron.h"
 
 template <class NeuronClass, unsigned PROCESSING_LAYERS_COUNT>
-class NeuralNetwork
+class NeuralNetwork : public NeuralNetworkI
 {
     static_assert(PROCESSING_LAYERS_COUNT > 0, "Network needs to have at least one processing layer!");
     InputNeuron m_biasNeuron;
     std::array<std::vector<NeuronClass>, PROCESSING_LAYERS_COUNT> m_processingLayers;
     std::vector<InputNeuron> m_inputLayer;
     std::vector<std::unique_ptr<Connection<Neuron, ProcessingNeuron>>> m_connections;
+    std::vector<double> m_outputMultiplier;
 
     template <typename F>
     void foreachProcessingNeuron(F function)
@@ -112,27 +112,31 @@ public:
             connectLayers(m_processingLayers[i], m_processingLayers[i+1]);
             randomizeWeights(m_processingLayers[i+1]);
         }
+
+        m_outputMultiplier.resize(m_processingLayers.back().size(), 1.0);
     }
 
-    void calculateOutput()
+    void calculateOutput() override
     {
         foreachProcessingNeuron([](auto &neuron){neuron.calculateOutput();});
     }
 
-    std::vector<double> getOutput()
+    std::vector<double> getOutput() override
     {
         std::vector<double> output;
+        auto multiplier = m_outputMultiplier.begin();
         calculateOutput();
 
         for (const auto &neuron : m_processingLayers.back())
         {
-            output.push_back(neuron.getOutput());
+            output.push_back(neuron.getOutput() * (*multiplier));
+            ++multiplier;
         }
 
         return output;
     }
 
-    void setInput(const std::vector<double> &inputs)
+    void setInput(const std::vector<double> &inputs) override
     {
         auto it = inputs.begin();
         for (InputNeuron &neuron : m_inputLayer)
@@ -141,12 +145,15 @@ public:
         }
     }
 
-    void backPropagate(const std::vector<double> &expectedOutput)
+    void backPropagate(const std::vector<double> &expectedOutput) override
     {
         auto expected = expectedOutput.begin();
+        auto multiplier = m_outputMultiplier.begin();
         for (auto &neuron : m_processingLayers.back())
         {
-            neuron.calculateDelta(*(expected++));
+            neuron.calculateDelta((*expected) / (*multiplier));
+            ++expected;
+            ++multiplier;
         }
 
         for (auto it = std::next(m_processingLayers.rbegin());
@@ -160,7 +167,13 @@ public:
         }
     }
 
-    void updateWeights(double learningRate)
+    void setOutputMultiplier(const std::vector<double> &outputMultiplier) override
+    {
+        m_outputMultiplier = outputMultiplier;
+    }
+
+
+    void updateWeights(double learningRate) override
     {
         foreachProcessingNeuron([learningRate](auto &neuron){neuron.updateWeights(learningRate);});
     }

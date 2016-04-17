@@ -2,7 +2,6 @@
 
 #include <vector>
 #include "Connection.h"
-#include "dummy.h"
 
 /**
  * @brief

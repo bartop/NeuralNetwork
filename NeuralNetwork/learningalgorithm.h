@@ -1,13 +1,12 @@
 #pragma once
-#include "neuralnetwork.h"
+#include "neuralnetworki.h"
 
-template <typename NeuronClass, unsigned LAYERS>
 class LearningAlgorithm
 {
-    NeuralNetwork<NeuronClass, LAYERS> &m_network;
+    NeuralNetworkI &m_network;
 
 public:
-    LearningAlgorithm(NeuralNetwork<NeuronClass, LAYERS> &network) : m_network(network)
+    LearningAlgorithm(NeuralNetworkI &network) : m_network(network)
     {
 
     }
@@ -27,7 +26,7 @@ public:
 
     void learn(const std::vector<std::vector<double>> &inputs,
                const std::vector<std::vector<double>> &expectedOutputs,
-               double rate = 0.05,
+               double rate = 0.5,
                unsigned repeat = 1)
     {
         for (unsigned k = 0; k < repeat; ++k)
@@ -38,6 +37,30 @@ public:
                 m_network.calculateOutput();
                 m_network.backPropagate(expectedOutputs[i]);
                 m_network.updateWeights(rate);
+            }
+        }
+    }
+
+    void learnUntilError(const std::vector<std::vector<double>> &inputs,
+               const std::vector<std::vector<double>> &expectedOutputs,
+               double rate,
+               double desiredError)
+    {
+        bool repeat = true;
+        while (repeat)
+        {
+            repeat = false;
+            for (unsigned i = 0; i < inputs.size(); ++i)
+            {
+                m_network.setInput(inputs[i]);
+                m_network.calculateOutput();
+                m_network.backPropagate(expectedOutputs[i]);
+                m_network.updateWeights(rate);
+
+                if (meanSquareError(expectedOutputs[i]) > desiredError)
+                {
+                    repeat = true;
+                }
             }
         }
     }

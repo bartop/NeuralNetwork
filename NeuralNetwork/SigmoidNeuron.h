@@ -33,6 +33,7 @@ private:
     double m_multiplier;
     double m_delta;
     double m_outputValue;
+    std::vector<double> m_prevWeightChanges;
 
     double activationFunction(double x) const;
     double outputDerivative() const;
