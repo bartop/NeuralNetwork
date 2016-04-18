@@ -288,6 +288,19 @@ TEST_CASE("simple NeuralNetwork test")
             INFO ("For inputs: " << i/2 << ", " << i%2);
             CHECK (neuralNetwork.getOutput().front() == Approx(expected).epsilon(0.01));
         }
+
+        NeuralNetwork<SigmoidNeuron, 2> copy(neuralNetwork.toJson());
+
+        for (unsigned i = 0; i < 4; ++i)
+        {
+            double expected = ((i/2)^(i%2))&1;
+
+            copy.setInput({(double)(i/2),
+                                    (double)(i%2)});
+
+            INFO ("For inputs: " << i/2 << ", " << i%2);
+            CHECK (copy.getOutput().front() == Approx(expected).epsilon(0.01));
+        }
     }
 }
 
@@ -319,6 +332,7 @@ TEST_CASE("LearningAlgorithm test")
             network.setInput({input});
             CHECK(network.getOutput().front() == Approx(std::sqrt(input)).epsilon(0.1));
         }
+
     }
 }
 
@@ -335,7 +349,7 @@ TEST_CASE("WeatherDataReader")
 
     SECTION("Learning weather prediction")
     {
-        auto data = reader.generateTrainingData(3, 1);
+        auto data = reader.generateTrainingData(30, 1);
 
         NeuralNetwork<SigmoidNeuron, 2> network{data.first.front().size(), 1000, data.second.front().size()};
         LearningAlgorithm learningAlgorithm(network);
@@ -343,7 +357,7 @@ TEST_CASE("WeatherDataReader")
         network.setOutputMultiplier({100, 100, 360, 100, 100, 100, 100, 360, 100, 100, 100, 100, 360, 100, 100, 100, 100, 360, 100, 100, 100, 100, 360, 100, 100, 100, 100, 360, 100, 100});
         network.setOutputOffset({0, 0, 0, 100, 0, 0, 0, 0, 100, 0, 0, 0, 0, 100, 0, 0, 0, 0, 100, 0, 0, 0, 0, 100, 0, 0, 0, 0, 100, 0});
 
-        learningAlgorithm.learn(data.first, data.second, 10);
+        learningAlgorithm.learn(data.first, data.second, 0.5, 10);
 
         network.setInput(data.first[100]);
 

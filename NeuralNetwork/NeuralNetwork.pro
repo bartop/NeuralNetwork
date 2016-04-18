@@ -26,5 +26,6 @@ HEADERS += \
     learningalgorithm.h \
     helper.h \
     neuralnetworki.h \
-    weatherdatareader.h
+    weatherdatareader.h \
+    json.hpp
 

@@ -9,10 +9,13 @@
 
 #include "InputNeuron.h"
 #include "helper.h"
+#include "json.hpp"
 
 template <class NeuronClass, unsigned PROCESSING_LAYERS_COUNT>
 class NeuralNetwork : public NeuralNetworkI
 {
+    using json = nlohmann::json;
+
     static_assert(PROCESSING_LAYERS_COUNT > 0, "Network needs to have at least one processing layer!");
     InputNeuron m_biasNeuron;
     std::array<std::vector<NeuronClass>, PROCESSING_LAYERS_COUNT> m_processingLayers;
@@ -92,12 +95,13 @@ class NeuralNetwork : public NeuralNetworkI
         connectLayers(m_inputLayer, m_processingLayers[i]);
     }*/
 
-public:
-    NeuralNetwork(const std::initializer_list<unsigned> &neuronsInLayers) :
-        m_biasNeuron(1.0)
+    template <typename Iter>
+    void reinitialize(Iter begin, Iter end)
     {
-        //static_assert(neuronsInLayers.size() == PROCESSING_LAYERS_COUNT + 1, "Wrong size!");
-        auto it = neuronsInLayers.begin();
+        m_biasNeuron = InputNeuron(1.0);
+        m_connections.clear();
+
+        auto it = begin;
         m_inputLayer.resize(*it);
 
         for (auto &vec : m_processingLayers)
@@ -116,7 +120,18 @@ public:
 
         m_outputMultiplier.resize(m_processingLayers.back().size(), 1.0);
         m_outputOffset.resize(m_processingLayers.back().size(), 0.0);
+    }
 
+public:
+    NeuralNetwork(const std::initializer_list<unsigned> &neuronsInLayers) :
+        m_biasNeuron(1.0)
+    {
+        reinitialize(neuronsInLayers.begin(), neuronsInLayers.end());
+    }
+
+    NeuralNetwork(const json &network)
+    {
+        fromJson(network);
     }
 
     void calculateOutput() override
@@ -200,5 +215,58 @@ public:
         return m_inputLayer;
     }
 
+    json toJson() const
+    {
 
+        json network;
+        network["layersSize"].push_back(m_inputLayer.size());
+
+        for (const auto &layer : m_processingLayers)
+        {
+            network["layersSize"].push_back(layer.size());
+        }
+
+        for (const auto &connection : m_connections)
+        {
+            network["weights"].push_back(connection->getWeight());
+        }
+
+        for (double offset : m_outputOffset)
+        {
+            network["outputOffset"].push_back(offset);
+        }
+
+        for (double offset : m_outputMultiplier)
+        {
+            network["outputMultiplier"].push_back(offset);
+        }
+
+        return network;
+    }
+
+    void fromJson(const json &network)
+    {
+        reinitialize(network["layersSize"].begin(), network["layersSize"].end());
+
+        auto it = network["weights"].begin();
+
+        for (auto &connection : m_connections)
+        {
+            connection->setWeight(*(it++));
+        }
+
+        it = network["outputOffset"].begin();
+
+        for (double &offset : m_outputOffset)
+        {
+            offset = *(it++);
+        }
+
+        it = network["outputMultiplier"].begin();
+
+        for (double &multiplier : m_outputMultiplier)
+        {
+            multiplier = *(it++);
+        }
+    }
 };
