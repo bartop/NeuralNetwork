@@ -5,7 +5,8 @@
 #include "NeuralNetwork/NeuralNetwork.h"
 #include "NeuralNetwork/SigmoidNeuron.h"
 #include "NeuralNetwork/LearningAlgorithm.h"
-#include "weatherdatareader.h"
+#include "csvparser.hpp"
+#include "csvnetworkbuilder.hpp"
 
 namespace Ui {
 class MainWindow;
@@ -17,7 +18,8 @@ class MainWindow : public QMainWindow
 
     NeuralNetwork<SigmoidNeuron, 2> m_network;
     LearningAlgorithm m_algoritm{m_network};
-    WeatherDataReader m_dataReader{"/home/rames/Projects/Qt/NeuralNetwork/NeuralNetwork/Data/1_avg.csv"};
+    CSV::Data m_data;
+    CSVNetworkBuilder m_builder;
 
 public:
     explicit MainWindow(QWidget *parent = 0);

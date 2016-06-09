@@ -36,13 +36,13 @@ public:
 };
 
 class Row {
-    const std::vector<std::string> m_header;
+    std::vector<std::string> m_header;
     std::vector<Item> m_items;
 
 public:
     Row(const std::vector<std::string> &items, const std::vector<std::string> &header) : m_header(header) {
         if (items.size() != header.size()) {
-            throw new std::invalid_argument("Wrong items/header count!");
+            throw std::invalid_argument("Wrong items/header count!");
         }
 
         for (const auto &item : items) {
@@ -54,7 +54,7 @@ public:
         auto iter = std::find(m_header.begin(), m_header.end(), columnName);
 
         if (iter == m_header.end()) {
-            throw new std::invalid_argument(std::string("Invalid column name '").append(columnName).append("'"));
+            throw std::invalid_argument(std::string("Invalid column name '").append(columnName).append("'"));
         }
 
         return *std::next(m_items.begin(), std::distance(m_header.begin(), iter));
@@ -62,6 +62,44 @@ public:
 
     const std::vector<Item> &getItems() const {
         return m_items;
+    }
+
+    void remove(std::size_t index) {
+        if (index >= m_header.size()) {
+            throw std::invalid_argument("Index exceedes columns number!");
+        }
+        m_header.erase(std::next(m_header.begin(), index));
+        m_items.erase(std::next(m_items.begin(), index));
+    }
+};
+
+class Column {
+    const std::string m_name;
+    std::vector<Item> m_items;
+
+public:
+    Column(const std::string &name, const std::vector<Row> &rows, std::size_t index) : m_name(name) {
+        for (const auto &row : rows) {
+            m_items.push_back(row.getItems().at(index));
+        }
+    }
+
+    const std::vector<Item> &getItems() const {
+        return m_items;
+    }
+
+    bool isNumeric() const {
+        for (const auto &item : getItems()) {
+            if (!item.isNumeric()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    const std::string &getName() const {
+        return m_name;
     }
 };
 
@@ -117,7 +155,17 @@ public:
         return m_rows;
     }
 
-    const std::vector<Item> getColumn(const std::string &columnName) const {
+    const std::vector<Column> getColumns() const {
+        std::vector<Column> columns;
+
+        for (std::size_t i = 0; i < m_rows.size(); ++i) {
+            columns.push_back(Column(m_header.at(i), m_rows, i));
+        }
+
+        return columns;
+    }
+
+    const Column getColumn(const std::string &columnName) const {
         auto iter = std::find(m_header.begin(), m_header.end(), columnName);
 
         if (iter == m_header.end()) {
@@ -126,13 +174,18 @@ public:
 
         auto index = std::distance(m_header.begin(), iter);
 
-        std::vector<Item> column;
+        return Column(*iter, m_rows, index);
+    }
 
-        for (const Row &row : m_rows) {
-            column.push_back(row.getItems().at(static_cast<std::size_t>(index)));
+    void removeColumn(std::size_t columnIndex) {
+        for (auto &row : m_rows) {
+            row.remove(columnIndex);
         }
+    }
 
-        return column;
+    void removeColumn(const std::string &columnName) {
+       auto iter = std::find(m_header.begin(), m_header.end(), columnName);
+       removeColumn(std::distance(m_header.begin(), iter));
     }
 };
 }

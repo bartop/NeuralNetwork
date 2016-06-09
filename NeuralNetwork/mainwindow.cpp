@@ -7,27 +7,25 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    m_network({30, 30, 10}, SigmoidNeuron(0.9))
+    m_network({30, 30, 10}, SigmoidNeuron(0.9)),
+    m_data(R"(C:\Users\Rafal\Dysk Google\QtProjects\NeuralNetworkGIT\NeuralNetwork\NeuralNetwork\Data\new.csv)")
+
 {
     ui->setupUi(this);
-    CSV::Data csv("/home/rames/Projects/Qt/NeuralNetwork/NeuralNetwork/Data/new.csv");
 
-    ui->tableWidget->setColumnCount(csv.getHeader().size());
-    for (std::size_t i = 0; i < csv.getHeader().size(); ++i) {
-        ui->tableWidget->setHorizontalHeaderItem(i, new QTableWidgetItem(csv.getHeader().at(i).c_str()));
+    ui->tableWidget->setColumnCount(m_data.getHeader().size());
+    for (std::size_t i = 0; i < m_data.getHeader().size(); ++i) {
+        ui->tableWidget->setHorizontalHeaderItem(i, new QTableWidgetItem(m_data.getHeader().at(i).c_str()));
     }
 
-    ui->tableWidget->setRowCount(csv.getRows().size());
+    ui->tableWidget->setRowCount(m_data.getRows().size());
 
-    for (std::size_t i = 0; i < csv.getRows().size(); ++i) {
-        for (std::size_t j = 0; j < csv.getRows().at(i).getItems().size(); ++j) {
-            std::string item = csv.getRows().at(i).getItems().at(j);
+    for (std::size_t i = 0; i < m_data.getRows().size(); ++i) {
+        for (std::size_t j = 0; j < m_data.getRows().at(i).getItems().size(); ++j) {
+            std::string item = m_data.getRows().at(i).getItems().at(j);
             ui->tableWidget->setItem(i, j, new QTableWidgetItem(item.c_str()));
         }
     }
-
-
-
 }
 
 MainWindow::~MainWindow()

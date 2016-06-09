@@ -30,7 +30,8 @@ HEADERS += \
     NeuralNetwork/Normalizer.h \
     NeuralNetwork/loops.hpp \
     NeuralNetwork/jsonifyable.h \
-    csvparser.hpp
+    csvparser.hpp \
+    csvnetworkbuilder.hpp
 
 FORMS += \
     mainwindow.ui
