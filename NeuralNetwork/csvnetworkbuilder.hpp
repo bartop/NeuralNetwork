@@ -1,9 +1,11 @@
 #pragma once
 #include <utility>
+#include <memory>
 
 #include "csvparser.hpp"
 #include "NeuralNetwork/NeuralNetwork.h"
 #include "NeuralNetwork/SigmoidNeuron.h"
+
 
 class CSVNetworkBuilder {
     double m_inertionRatio;
@@ -12,6 +14,21 @@ class CSVNetworkBuilder {
     unsigned m_predictedRows;
     unsigned m_processingNeurons;
 
+    std::vector<double> repeat(const std::vector<double> &toRepeat, unsigned times) const
+    {
+        std::vector<double> result;
+
+        for (unsigned i = 0; i < times; ++i)
+        {
+            for (double element : toRepeat)
+            {
+                result.push_back(element);
+            }
+        }
+
+        return result;
+    }
+
 public:
     CSVNetworkBuilder &setInertion(double rate) {
         m_inertionRatio = rate;
@@ -19,10 +36,10 @@ public:
     }
 
     CSVNetworkBuilder &setCSVData(const CSV::Data &data) {
-        m_data = &data;
+        m_data = data;
 
-        for (const auto &column : m_data->getColumns()) {
-            if (column.isNumeric()) {
+        for (const auto &column : m_data.getColumns()) {
+            if (!column.isNumeric()) {
                 m_data.removeColumn(column.getName());
             }
         }
@@ -45,19 +62,43 @@ public:
         return *this;
     }
 
-    NeuralNetwork<SigmoidNeuron, 2> build() const {
-        std::array<unsigned, 3> neurons = {m_previousRows*m_data.getHeader().size(), m_processingNeurons, m_predictedRows*m_data.getHeader().size()};
-        NeuralNetwork<SigmoidNeuron, 2> network(neurons, SigmoidNeuron(m_inertionRatio));
-        return newtork;
+    std::unique_ptr<NeuralNetwork<SigmoidNeuron, 2>> build() const {
+        std::array<unsigned, 3> neurons = {m_previousRows*m_data.getHeader().size(),
+                                           m_processingNeurons,
+                                           m_predictedRows*m_data.getHeader().size()};
+        std::unique_ptr<NeuralNetwork<SigmoidNeuron, 2>> network{new NeuralNetwork<SigmoidNeuron, 2>(neurons, SigmoidNeuron(m_inertionRatio))};
+
+        std::vector<double> min;
+        std::vector<double> max;
+
+        for (const auto &column : m_data.getColumns()) {
+            auto minmax = std::minmax_element(column.getItems().begin(),
+                                              column.getItems().end(),
+                                              [](const CSV::Item &r, const CSV::Item &l) {
+                return double(r) < double(l);
+            });
+            min.push_back(*minmax.first - std::fabs(*minmax.second)*0.25);
+            max.push_back(*minmax.second + std::fabs(*minmax.second)*0.25);
+        }
+
+        network->getInputNormalizer().setMin(repeat(min, m_previousRows));
+        network->getInputNormalizer().setMax(repeat(max, m_previousRows));
+
+        network->getOutputNormalizer().setMin(repeat(min, m_predictedRows));
+        network->getOutputNormalizer().setMax(repeat(max, m_predictedRows));
+
+        return network;
     }
 
     std::pair<std::vector<std::vector<double>>, std::vector<std::vector<double>>> generateTrainingData()
     {
-        std::vector<double> data;
-        for (const auto &row : m_data->getRows()) {
-            for (const auto &item : row.getItem()) {
-                data.push_back(item);
+        std::vector<std::vector<double>> data;
+        for (const auto &row : m_data.getRows()) {
+            std::vector<double> r;
+            for (const auto &item : row.getItems()) {
+                r.push_back(item);
             }
+            data.push_back(r);
         }
 
         std::vector<std::vector<double>> inputs;
@@ -81,7 +122,7 @@ public:
             row.clear();
 
             for(unsigned i = 0;
-                (i < m_predictedRows) && (it != daa.end());
+                (i < m_predictedRows) && (it != data.end());
                 (++i, ++it))
             {
                 row.insert(row.end(), it->begin(), it->end());
@@ -103,5 +144,10 @@ public:
         }
 
         return std::make_pair(inputs, outputs);
+    }
+
+    const CSV::Data &getFilteredData() const
+    {
+        return m_data;
     }
 };

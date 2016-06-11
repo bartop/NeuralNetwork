@@ -14,6 +14,10 @@ public:
 
     }
 
+    Item(double value) : m_value(std::to_string(value)) {
+
+    }
+
     bool isNumeric() const {
         std::size_t index;
 
@@ -147,6 +151,9 @@ public:
         }
     }
 
+    Data(const Data &) = default;
+    Data(){}
+
     const std::vector<std::string> getHeader() const {
         return m_header;
     }
@@ -158,7 +165,7 @@ public:
     const std::vector<Column> getColumns() const {
         std::vector<Column> columns;
 
-        for (std::size_t i = 0; i < m_rows.size(); ++i) {
+        for (std::size_t i = 0; i < m_header.size(); ++i) {
             columns.push_back(Column(m_header.at(i), m_rows, i));
         }
 
@@ -169,7 +176,7 @@ public:
         auto iter = std::find(m_header.begin(), m_header.end(), columnName);
 
         if (iter == m_header.end()) {
-            throw new std::invalid_argument(std::string("Invalid column name '").append(columnName).append("'"));
+            throw std::invalid_argument(std::string("Invalid column name '").append(columnName).append("'"));
         }
 
         auto index = std::distance(m_header.begin(), iter);
@@ -177,7 +184,29 @@ public:
         return Column(*iter, m_rows, index);
     }
 
+    void addRow(const std::vector<std::string> &row) {
+        if (row.size() == m_header.size())
+        {
+            m_rows.push_back(Row(row, m_header));
+        } else
+        {
+            throw std::invalid_argument(std::string("Invalid row size!"));
+        }
+    }
+
+    void setHeader(const std::vector<std::string> &header) {
+        if (header.size() != m_header.size() &&
+            m_rows.size() > 0)
+        {
+            throw std::invalid_argument(std::string("Invalid header size!"));
+        } else
+        {
+            m_header = header;
+        }
+    }
+
     void removeColumn(std::size_t columnIndex) {
+        m_header.erase(std::next(m_header.begin(), columnIndex));
         for (auto &row : m_rows) {
             row.remove(columnIndex);
         }
@@ -186,6 +215,31 @@ public:
     void removeColumn(const std::string &columnName) {
        auto iter = std::find(m_header.begin(), m_header.end(), columnName);
        removeColumn(std::distance(m_header.begin(), iter));
+    }
+
+    void save(const std::string &filePath)
+    {
+        std::ofstream file(filePath);
+
+        std::string separator = "";
+        for (const auto &item : m_header)
+        {
+            file << separator << item;
+            separator = m_itemSeparator;
+        }
+
+
+        for (const auto &row : m_rows)
+        {
+            file << m_lineSeparator;
+            separator = "";
+            for (const auto &item : row.getItems())
+            {
+               file << separator << item;
+               separator = m_itemSeparator;
+            }
+        }
+
     }
 };
 }
