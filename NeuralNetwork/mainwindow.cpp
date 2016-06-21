@@ -36,10 +36,11 @@ void MainWindow::printCSVToTable(const CSV::Data &data, QTableWidget *table)
 
     table->setRowCount(data.getRows().size());
 
-    for (std::size_t i = 0; i < data.getRows().size(); ++i) {
-        for (std::size_t j = 0; j < data.getRows().at(i).getItems().size(); ++j) {
-            std::string item = data.getRows().at(i).getItems().at(j);
-            table->setItem(i, j, new QTableWidgetItem(item.c_str()));
+    const auto &rows = data.getRows();
+    for (std::size_t i = 0; i < rows.size(); ++i) {
+        const auto &items = rows[i].getItems();
+        for (std::size_t j = 0; j < items.size(); ++j) {
+            table->setItem(i, j, new QTableWidgetItem(((std::string)items[j]).c_str()));
         }
     }
 }
@@ -126,4 +127,30 @@ void MainWindow::on_actionSave_triggered()
         tr("Wybierz plik CSV"), "", "");
 
     generateData(fileName.toStdString());
+}
+
+void MainWindow::on_actionSaveNetwork_triggered()
+{
+    QString fileName = QFileDialog::getSaveFileName(this,
+        tr("Wybierz plik"), "", "JSON (*.js, *.json)");
+
+    if (m_network && !fileName.isEmpty())
+    {
+        std::ofstream file(fileName.toStdString());
+        file << m_network->toJson();
+    }
+}
+
+void MainWindow::on_actionOpenNetwork_triggered()
+{
+    QString fileName = QFileDialog::getOpenFileName(this,
+        tr("Wybierz plik"), "", "JSON (*.js, *.json)");
+
+    if (m_network && !fileName.isEmpty())
+    {
+        std::ifstream file(fileName.toStdString());
+        nlohmann::json js;
+        file >> js;
+        m_network = std::unique_ptr<NeuralNetwork<>>(new NeuralNetwork<>(js));
+    }
 }

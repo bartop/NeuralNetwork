@@ -38,6 +38,10 @@ private slots:
 
     void on_actionSave_triggered();
 
+    void on_actionSaveNetwork_triggered();
+
+    void on_actionOpenNetwork_triggered();
+
 private:
     void printCSVToTable(const CSV::Data &data, QTableWidget *table);
     void buildNetwork();

@@ -28,7 +28,10 @@ public:
     {
         if (min.size() != m_min.size())
         {
-            throw std::invalid_argument("Wrong vector size!");
+            throw std::invalid_argument(std::string("Wrong vector size!\n")
+                                              .append(__FILE__)
+                                              .append(": ")
+                                              .append(std::to_string(__LINE__)));
         }
 
         m_min = min;
@@ -39,7 +42,10 @@ public:
     {
         if (max.size() != m_max.size())
         {
-            throw std::invalid_argument("Wrong vector size!");
+            throw std::invalid_argument(std::string("Wrong vector size!\n")
+                                              .append(__FILE__)
+                                              .append(": ")
+                                              .append(std::to_string(__LINE__)));
         }
 
         m_max = max;
@@ -51,7 +57,10 @@ public:
     {
         if (toNormalize.size() != m_max.size())
         {
-            throw std::invalid_argument("Wrong vector size!");
+            throw std::invalid_argument(std::string("Wrong vector size!\n")
+                                        .append(__FILE__)
+                                        .append(": ")
+                                        .append(std::to_string(__LINE__)));
         }
 
         std::size_t i = 0;
@@ -68,7 +77,10 @@ public:
     {
         if (toDenormalize.size() != m_max.size())
         {
-            throw std::invalid_argument("Wrong vector size!");
+            throw std::invalid_argument(std::string("Wrong vector size!\n")
+                                        .append(__FILE__)
+                                        .append(": ")
+                                        .append(std::to_string(__LINE__)));
         }
 
         std::size_t i = 0;

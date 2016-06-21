@@ -11,11 +11,12 @@
 #include "helper.h"
 #include "json.hpp"
 #include "Normalizer.h"
+#include "SigmoidNeuron.h"
 #include <range/v3/all.hpp>
 
 using namespace ranges;
 
-template <class NeuronClass, unsigned PROCESSING_LAYERS_COUNT>
+template <class NeuronClass = SigmoidNeuron, unsigned PROCESSING_LAYERS_COUNT = 2>
 class NeuralNetwork : public NeuralNetworkI
 {
     using json = nlohmann::json;

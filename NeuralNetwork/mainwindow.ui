@@ -302,12 +302,20 @@
    </property>
    <widget class="QMenu" name="menuPlik">
     <property name="title">
-     <string>Plik</string>
+     <string>Dane</string>
     </property>
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
    </widget>
+   <widget class="QMenu" name="menuSie">
+    <property name="title">
+     <string>Sieć</string>
+    </property>
+    <addaction name="actionOpenNetwork"/>
+    <addaction name="actionSaveNetwork"/>
+   </widget>
    <addaction name="menuPlik"/>
+   <addaction name="menuSie"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionOpen">
@@ -324,6 +332,16 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionOpenNetwork">
+   <property name="text">
+    <string>Wczytaj</string>
+   </property>
+  </action>
+  <action name="actionSaveNetwork">
+   <property name="text">
+    <string>Zapisz</string>
    </property>
   </action>
  </widget>
