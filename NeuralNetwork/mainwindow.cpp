@@ -74,6 +74,7 @@ void MainWindow::checkProgress()
 {
     auto progress = m_algorithm->getProgress();
     ui->progressBar->setValue(progress*100);
+    ui->statusbar->showMessage(QString("Średni błąd średniokwadratowy: %1").arg(m_algorithm->getCurrentError()));
 
     if (progress < 1.f)
     {
