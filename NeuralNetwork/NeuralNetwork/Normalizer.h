@@ -6,12 +6,20 @@
 
 #include "jsonifyable.h"
 
+/**
+ * @brief Szablon klasy służącej do normalizacji wartości wektora na podstawie osiągalnych maksimów i minimów.
+ * @tparam T typ elementów normalizowanych. Musi być typem arytmetycznym.
+ */
 template <typename T>
 class Normalizer : public JSONifyable{
     std::vector<T> m_min;
     std::vector<T> m_max;
 
 public:
+    /**
+     * @brief Normalizer konstruktor ustawiający rozmiar.
+     * @param size rozmiar normalizowanego wektora.
+     */
     Normalizer(std::size_t size):
         m_min(size, 0),
         m_max(size, 1)
@@ -19,11 +27,14 @@ public:
 
     }
 
-    Normalizer()
-    {
+    Normalizer() {}
 
-    }
-
+    /**
+     * @brief Ustawia wektor minimalnych wartości.
+     * @param min wektor możliwych minimów. Rozmiar tego wektora musi być równy rozmiarowi ustawionemu w konstruktorze Normalizera.
+     * @throws std::invalid_argument jeśli rozmiar wektora jest nieprawidłowy.
+     * @return referencję do samego siebie (*this).
+     */
     Normalizer &setMin(const std::vector<T> &min)
     {
         if (min.size() != m_min.size())
@@ -38,6 +49,13 @@ public:
         return *this;
     }
 
+
+    /**
+     * @brief Ustawia wektor maksymalnych wartości.
+     * @param min wektor możliwych minimów. Rozmiar tego wektora musi być równy rozmiarowi ustawionemu w konstruktorze Normalizera.
+     * @throws std::invalid_argument jeśli rozmiar wektora jest nieprawidłowy.
+     * @return referencję do samego siebie (*this).
+     */
     Normalizer &setMax(const std::vector<T> &max)
     {
         if (max.size() != m_max.size())
@@ -52,6 +70,12 @@ public:
         return *this;
     }
 
+    /**
+     * @brief Normalizuje przekazaną kolekcję zgodnie ze wzorem toNormalize[i] = (toNormalize[i] - min[i])/(max[i] - min[i])
+     * @tparam C typ normalizowanego kontenera. Musi zawierać elementy pozwalającę na operacje arytmetyczne z typem T (zwykle typu T).
+     * @param toNormalize wektor normalizowany "in place". Jego rozmiaru musi być zgodny z rozmiarem ustawionego w konstruktorze Normalizera.
+     * @throws std::invalid_argument jeśli rozmiar wektora jest nieprawidłowy.
+     */
     template <typename C>
     void normalize(C &toNormalize)
     {
@@ -72,6 +96,13 @@ public:
         }
     }
 
+    /**
+     * @brief Denormalizuje przekazaną kolekcję zgodnie ze wzorem toDenormalize[i] = toDenormalize[i] * (max[i] - min[i]) + min[i].
+     * Przeprowadza operację odwrotną do operacji w metodzie normalize.
+     * @tparam C typ normalizowanego kontenera. Musi zawierać elementy pozwalającę na operacje arytmetyczne z typem T (zwykle typu T).
+     * @param toDenormalize wektor denormalizowany "in place". Jego rozmiaru musi być zgodny z rozmiarem ustawionego w konstruktorze Normalizera.
+     * @throws std::invalid_argument jeśli rozmiar wektora jest nieprawidłowy.
+     */
     template <typename C>
     void denormalize(C &toDenormalize)
     {

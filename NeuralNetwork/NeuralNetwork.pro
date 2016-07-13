@@ -3,16 +3,12 @@ CONFIG += c++14
 QT += core gui widgets
 
 SOURCES += \
-    weatherdatareader.cpp \
-    tests.cpp \
     mainwindow.cpp \
     main.cpp \
     NeuralNetwork/InputNeuron.cpp \
     NeuralNetwork/SigmoidNeuron.cpp
 
 HEADERS += \
-    catch.hpp \
-    weatherdatareader.h \
     mainwindow.h \
     NeuralNetwork/InputNeuron.h \
     NeuralNetwork/InputNode.h \

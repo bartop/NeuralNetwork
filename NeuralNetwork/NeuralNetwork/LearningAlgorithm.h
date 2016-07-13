@@ -6,7 +6,7 @@
 class LearningAlgorithm
 {
     NeuralNetworkI *m_network;
-    std::atomic_bool m_stop = false;
+    std::atomic_bool m_stop{false};
     float m_progress = 0;
     double m_avarageError = std::numeric_limits<double>::max();
 
@@ -14,6 +14,10 @@ public:
     LearningAlgorithm(NeuralNetworkI &network) : m_network(&network)
     {
 
+    }
+    
+    void stop() {
+        m_stop = true;
     }
 
     float getProgress() const {
@@ -43,22 +47,31 @@ public:
                double rate = 0.5,
                unsigned repeat = 1)
     {
+        unsigned errorUpdateRate = (repeat * 0.01) + 1; //błąd liczony co 1% postępu
         m_progress = 0.f;
-        for (unsigned k = 0; k < repeat; ++k)
+        m_stop = false;
+        for (unsigned k = 0; k < repeat && !m_stop; ++k)
         {
             double avarageError = 0.f;
 
-            for (unsigned i = 0; i < inputs.size(); ++i)
+            for (unsigned i = 0; i < inputs.size() && !m_stop; ++i)
             {
                 m_network->setInput(inputs[i]);
                 m_network->calculateOutput();
                 m_network->backPropagate(expectedOutputs[i]);
                 m_network->updateWeights(rate);
 
-                avarageError += meanSquareError(expectedOutputs[i]);
+                if (k % errorUpdateRate == 0)
+                {
+                    avarageError += meanSquareError(expectedOutputs[i]);
+                }
             }
-            avarageError /= inputs.size();
-            m_avarageError = avarageError;
+
+            if (k % errorUpdateRate == 0)
+            {
+                m_avarageError = avarageError/inputs.size();
+            }
+
             m_progress = float(k)/(repeat);
         }
         m_progress = 1;
@@ -70,21 +83,27 @@ public:
                double desiredError)
     {
         bool repeat = true;
-        while (repeat)
+        m_stop = false;
+        while (repeat && !m_stop)
         {
             repeat = false;
-            for (unsigned i = 0; i < inputs.size(); ++i)
+            double avarageError = 0;
+            for (unsigned i = 0; i < inputs.size() && !m_stop; ++i)
             {
                 m_network->setInput(inputs[i]);
                 m_network->calculateOutput();
                 m_network->backPropagate(expectedOutputs[i]);
                 m_network->updateWeights(rate);
 
-                if (meanSquareError(expectedOutputs[i]) > desiredError)
+                double error = meanSquareError(expectedOutputs[i]);
+                avarageError += error;
+
+                if (error > desiredError)
                 {
                     repeat = true;
                 }
             }
+            m_avarageError = avarageError/inputs.size();
         }
     }
 

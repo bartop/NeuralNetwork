@@ -1,21 +1,15 @@
-/*
- * Neuron.h
- *
- *  Created on: 23 mar 2016
- *      Author: Bartosz Miera
- */
-
 #pragma once
 
 #include "InputNode.h"
 #include "OutputNode.h"
 
 /**
- * @brief
- *
+ * @brief Węzeł wejściowy i wyjściowy jednocześni.
+ * @tparam T typ obiektu wejściowego w grafie.
+ * @tparam U typ obiektu wyjściowego w grafie. Node pośrednio dziedziczy po U.
  */
-template<typename Base, typename T = Base>
-class Node : public InputNode<Base, T, OutputNode<Base, T>>
+template<typename T, typename U = T>
+class Node : public InputNode<T, U, OutputNode<T, U>>
 {
 
 };

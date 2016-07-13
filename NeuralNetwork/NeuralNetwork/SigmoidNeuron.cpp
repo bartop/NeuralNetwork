@@ -1,10 +1,3 @@
-/*
- * Neuron.cpp
- *
- *  Created on: 23 mar 2016
- *      Author: Bartosz Miera
- */
-
 #include "SigmoidNeuron.h"
 #include "Connection.h"
 #include <cmath>

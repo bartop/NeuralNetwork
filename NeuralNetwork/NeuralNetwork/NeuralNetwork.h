@@ -12,10 +12,12 @@
 #include "json.hpp"
 #include "Normalizer.h"
 #include "SigmoidNeuron.h"
-#include <range/v3/all.hpp>
 
-using namespace ranges;
-
+/**
+ * Generyczna klasa sieci neuronowej.
+ * @tparam NeuronClass klasa neurona przetwarzającego
+ * @tparam PROCESSING_LAYERS_COUNT liczba warstw przetwarzających (czyli liczba warstw ukrytych + 1).
+ */
 template <class NeuronClass = SigmoidNeuron, unsigned PROCESSING_LAYERS_COUNT = 2>
 class NeuralNetwork : public NeuralNetworkI
 {
@@ -80,28 +82,6 @@ class NeuralNetwork : public NeuralNetworkI
         }
     }
 
-    /*template <unsigned i = 0, typename... T>
-    void initialize(T first, T...args)
-    {
-        randomizeWeights(m_processingLayers);
-    }
-
-    template <unsigned i, typename T>
-    void initialize(T first)
-    {
-        static_assert( i != PROCESSING_LAYERS_COUNT - 1, "Wrong number of initializers");
-        m_processingLayers.resize(first);
-        randomizeWeights(m_processingLayers[i]);
-        connectLayers(m_processingLayers[i - 1], m_processingLayers[i]);
-    }
-
-    template <unsigned i, typename T>
-    void initialize<0, T>(T first)
-    {
-        randomizeWeights(m_processingLayers[i]);
-        connectLayers(m_inputLayer, m_processingLayers[i]);
-    }*/
-
     template <typename Iter>
     void reinitialize(Iter begin, Iter end)
     {
@@ -131,10 +111,20 @@ class NeuralNetwork : public NeuralNetworkI
     }
 
 public:
-    NeuralNetwork(const std::array<unsigned, PROCESSING_LAYERS_COUNT + 1> &neuronsInLayers) : NeuralNetwork(neuronsInLayers, NeuronClass())
+    /**
+     * @brief Konstruktor wykorzystujący domyślny neuron jako prototyp
+     * @param neuronsInLayers tablica z liczbą neuronów w danych warstwach
+     */
+    NeuralNetwork(const std::array<unsigned, PROCESSING_LAYERS_COUNT + 1> &neuronsInLayers) :
+        NeuralNetwork(neuronsInLayers, NeuronClass())
     {
     }
 
+    /**
+     * @brief Konstruktor inicjalizujący wszystkie warstwy sieci.
+     * @param neuronsInLayers tablica z liczbą neuronów w danych warstwach
+     * @param prototype neuron przetwarzający wykorzystywany jako prototyp do tworzenia innych neuronów przetwarzających.
+     */
     NeuralNetwork(const std::array<unsigned, PROCESSING_LAYERS_COUNT + 1> &neuronsInLayers, const NeuronClass &prototype) :
         m_biasNeuron(1.0), m_prototype(prototype), m_inputNormalizer(neuronsInLayers.front()), m_outputNormalizer(neuronsInLayers.back())
     {
@@ -228,7 +218,7 @@ public:
         return m_inputLayer;
     }
 
-    json toJson() const
+    json toJson() const override
     {
 
         json network;
@@ -257,7 +247,7 @@ public:
         return network;
     }
 
-    void fromJson(const json &network)
+    void fromJson(const json &network) override
     {
         reinitialize(network["layersSize"].begin(), network["layersSize"].end());
 

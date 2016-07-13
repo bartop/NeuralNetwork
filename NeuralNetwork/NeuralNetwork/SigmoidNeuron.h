@@ -14,11 +14,16 @@
 #include "json.hpp"
 
 /**
- * @brief
+ * @brief Klasa reprezentująca neuron z funkcją aktywacji typu sigmoid. Implementuje interfejs ProcessingNeuron. Jest też węzłem łączącym Nueron z ProcessingNeuron.
  *
  */
 class SigmoidNeuron: public Node<Neuron, ProcessingNeuron> {
 public:
+    /**
+     * @brief Konstruktor ustawiający parametry.
+     * @param inertialRatio współczynnik inercji, 0 to brak inercji, 1 to maksymalna inercja.
+     * @param multiplier mnożnik funkcji aktywacji
+     */
     SigmoidNeuron(double inertialRatio = 0.0, double multiplier = 1.0);
     SigmoidNeuron(const SigmoidNeuron &sigmoid) = default;
     SigmoidNeuron(SigmoidNeuron &&sigmoid) = default;
