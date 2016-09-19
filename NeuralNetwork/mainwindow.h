@@ -8,8 +8,8 @@
 #include "NeuralNetwork/NeuralNetwork.h"
 #include "NeuralNetwork/SigmoidNeuron.h"
 #include "NeuralNetwork/LearningAlgorithm.h"
-#include "csvparser.hpp"
-#include "csvnetworkbuilder.hpp"
+#include "csvparser.h"
+#include "csvnetworkbuilder.h"
 
 namespace Ui {
 class MainWindow;

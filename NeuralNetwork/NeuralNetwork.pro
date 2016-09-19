@@ -6,7 +6,10 @@ SOURCES += \
     mainwindow.cpp \
     main.cpp \
     NeuralNetwork/InputNeuron.cpp \
-    NeuralNetwork/SigmoidNeuron.cpp
+    NeuralNetwork/SigmoidNeuron.cpp \
+    csvnetworkbuilder.cpp \
+    csvparser.cpp \
+    NeuralNetwork/LearningAlgorithm.cpp
 
 HEADERS += \
     mainwindow.h \
@@ -26,8 +29,8 @@ HEADERS += \
     NeuralNetwork/Normalizer.h \
     NeuralNetwork/loops.hpp \
     NeuralNetwork/jsonifyable.h \
-    csvparser.hpp \
-    csvnetworkbuilder.hpp
+    csvnetworkbuilder.h \
+    csvparser.h
 
 FORMS += \
     mainwindow.ui
@@ -36,10 +39,7 @@ INCLUDEPATH += \
      NeuralNetwork/Range
 
 DISTFILES += \
-    deployment.pri \
-    NeuralNetwork.pro.user.c125da9 \
     Data/1_avg (kopia).csv \
-    Data/1_avg.csv \
     Data/2_avg (kopia).csv \
     Data/2_avg.csv \
     Data/1_avg (kopia).csv \

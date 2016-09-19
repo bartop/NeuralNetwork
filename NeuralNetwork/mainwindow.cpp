@@ -1,17 +1,13 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "csvparser.hpp"
+#include "csvparser.h"
 #include <QFileDialog>
 #include <fstream>
 #include <QTableWidgetItem>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    //m_data(R"(C:\Users\Rafal\Dysk Google\QtProjects\NeuralNetworkGIT\NeuralNetwork\NeuralNetwork\Data\new.csv)"),
-    m_data(R"(/home/rames/Projects/Qt/NeuralNetwork/NeuralNetwork/Data/new.csv)")
-
-
+    ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 

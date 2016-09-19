@@ -10,6 +10,10 @@ class ProcessingNeuron;
 class InputNeuron : public InputNode<Neuron, ProcessingNeuron>
 {
 public:
+    /**
+     * @brief Konstruktor ustawiający wartość neurono
+     * @param value wartość neuronu
+     */
     InputNeuron(double value = 0);
 
     /**
@@ -19,13 +23,13 @@ public:
     void setValue(double value);
 
     /**
-     * @brief
-     * @return zwraca ustawioną wartość neuronu.
+     * @brief Zwraca ustawioną wartość wyjścia neuronu.
+     * @return ustawiona wartość neuronu
      */
     double getOutput() const override;
 
     /**
-     * @brief calculateOutput nic nie robi - wyjście jest stałe, nie trzeba go wyliczać.
+     * @brief Nic nie robi - wyjście jest stałe, nie trzeba go wyliczać.
      */
     void calculateOutput() override;
 

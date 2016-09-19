@@ -11,8 +11,8 @@ public:
     virtual void calculateOutput() = 0;
 
     /**
-     * @brief
-     * @return Wektory wyjść neuronów warstwy wyjściowej
+     * @brief Zwraca wektor wartości wyjść neuronów warstwy wyjściowej.
+     * @return wektor wyjść neuronów warstwy wyjściowej
      */
     virtual std::vector<double> getOutput() = 0;
 
@@ -29,7 +29,7 @@ public:
     virtual void backPropagate(const std::vector<double> &expectedOutput) = 0;
 
     /**
-     * @brief Aktualizacj wszystkich wag połączeń.
+     * @brief Aktualizacja wszystkich wag połączeń.
      * @param learningRate współczynnik uczenia wykorzystywany przy aktualizaci.
      */
     virtual void updateWeights(double learningRate) = 0;

@@ -3,108 +3,72 @@
 #include <atomic>
 #include <limits>
 
+/**
+ * @brief Klasa realizująca proces uczenia sieci neuronowej.
+ *
+ * Klasa może być używana wielowątkowo, przy czym to klient klasy jest odpowiedzialny za zarządzanie wątkami.
+ */
 class LearningAlgorithm
 {
     NeuralNetworkI *m_network;
     std::atomic_bool m_stop{false};
-    float m_progress = 0;
-    double m_avarageError = std::numeric_limits<double>::max();
+    std::atomic<float> m_progress {0};
+    std::atomic<double> m_avarageError {std::numeric_limits<double>::max()};
 
 public:
-    LearningAlgorithm(NeuralNetworkI &network) : m_network(&network)
-    {
-
-    }
+    /**
+     * @brief Konstuktor przyjmujący referencję na uczoną sieć.
+     * @param network referencja na uczoną sieć, obiekt sieci musi żyć dłużej niż obiekt algorytmu uczącego
+     */
+    explicit LearningAlgorithm(NeuralNetworkI &network);
     
-    void stop() {
-        m_stop = true;
-    }
+    /**
+     * @brief Przerywa proces uczenia, przydatne, jeśli metody uczące zostały wywołane w osobnym wątku.
+     */
+    void stop();
 
-    float getProgress() const {
-        return m_progress;
-    }
+    /**
+     * @brief Zwraca aktualny postęp procesu uczenia, przydatne przy wykorzystaniu wielowątkowym.
+     * @return wartość procentowa postępu
+     */
+    float getProgress() const;
 
-    double meanSquareError(const std::vector<double> &expected)
-    {
-        auto it = expected.begin();
-        double sum = 0;
+    /**
+     * @brief Zwraca błąd średniokwadratowy dla podanych oczekiwanych wyjść i obecnego stanu sieci.
+     * @param expected oczekiwane wyjścia
+     * @return Błąd średniokwadratowy ze wszystkich wyjść sieci
+     */
+    double meanSquareError(const std::vector<double> &expected);
 
-        for (double output : m_network->getOutput())
-        {
-            sum += std::pow(output - *(it++), 2.0);
-        }
-
-        return sum/expected.size();
-    }
-
-    double getCurrentError() const {
-        return m_avarageError;
-    }
+    /**
+     * @brief Zwraca obecny, średni błąd średniokwadratowy. Przydatne przy wykorzystaniu wielowątkowym.
+     * @return średni błąd średniokwadratowy w poprzedniej epoce
+     */
+    double getCurrentError() const;
 
 
+    /**
+     * @brief Metoda odpowiadająca za proces uczenia o stałej liczbie epok.
+     * @param inputs wektor wejść sieci
+     * @param expectedOutputs wektor oczekiwanych wyjść sieci
+     * @param rate współczynnik uczenia
+     * @param repeat liczba powtórzeń (epok)
+     */
     void learn(const std::vector<std::vector<double>> &inputs,
                const std::vector<std::vector<double>> &expectedOutputs,
                double rate = 0.5,
-               unsigned repeat = 1)
-    {
-        unsigned errorUpdateRate = (repeat * 0.01) + 1; //błąd liczony co 1% postępu
-        m_progress = 0.f;
-        m_stop = false;
-        for (unsigned k = 0; k < repeat && !m_stop; ++k)
-        {
-            double avarageError = 0.f;
+               unsigned repeat = 1);
 
-            for (unsigned i = 0; i < inputs.size() && !m_stop; ++i)
-            {
-                m_network->setInput(inputs[i]);
-                m_network->calculateOutput();
-                m_network->backPropagate(expectedOutputs[i]);
-                m_network->updateWeights(rate);
-
-                if (k % errorUpdateRate == 0)
-                {
-                    avarageError += meanSquareError(expectedOutputs[i]);
-                }
-            }
-
-            if (k % errorUpdateRate == 0)
-            {
-                m_avarageError = avarageError/inputs.size();
-            }
-
-            m_progress = float(k)/(repeat);
-        }
-        m_progress = 1;
-    }
-
+    /**
+     * @brief Metoda odpowiadająca za proces uczenia, aż do osiągnięcia zadanego błędu.
+     * @param inputs wektor wejść sieci
+     * @param expectedOutputs wektor oczekiwanych wyjść sieci
+     * @param rate współczynnik uczenia
+     * @param desiredError oczekiwany błąd
+     */
     void learnUntilError(const std::vector<std::vector<double>> &inputs,
                const std::vector<std::vector<double>> &expectedOutputs,
                double rate,
-               double desiredError)
-    {
-        bool repeat = true;
-        m_stop = false;
-        while (repeat && !m_stop)
-        {
-            repeat = false;
-            double avarageError = 0;
-            for (unsigned i = 0; i < inputs.size() && !m_stop; ++i)
-            {
-                m_network->setInput(inputs[i]);
-                m_network->calculateOutput();
-                m_network->backPropagate(expectedOutputs[i]);
-                m_network->updateWeights(rate);
-
-                double error = meanSquareError(expectedOutputs[i]);
-                avarageError += error;
-
-                if (error > desiredError)
-                {
-                    repeat = true;
-                }
-            }
-            m_avarageError = avarageError/inputs.size();
-        }
-    }
+               double desiredError);
 
 };

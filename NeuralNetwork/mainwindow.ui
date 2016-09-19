@@ -268,7 +268,7 @@
      <x>0</x>
      <y>0</y>
      <width>892</width>
-     <height>26</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuPlik">
@@ -295,6 +295,9 @@
    </property>
    <property name="toolTip">
     <string>Otwórz plik CSV</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
    </property>
   </action>
   <action name="actionSave">
